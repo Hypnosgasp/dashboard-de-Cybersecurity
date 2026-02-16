@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>root@pedro:~# admin-panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="green"]{--accent:#00ff41;--accent-dim:rgba(0,255,65,0.06);--accent-border:rgba(0,255,65,0.12);--accent-glow:rgba(0,255,65,0.15);--matrix-color:#00ff41;}
+[data-theme="cyan"]{--accent:#00e5ff;--accent-dim:rgba(0,229,255,0.06);--accent-border:rgba(0,229,255,0.12);--accent-glow:rgba(0,229,255,0.15);--matrix-color:#00e5ff;}
+[data-theme="amber"]{--accent:#ffb300;--accent-dim:rgba(255,179,0,0.06);--accent-border:rgba(255,179,0,0.12);--accent-glow:rgba(255,179,0,0.15);--matrix-color:#ffb300;}
+:root{--bg:#0a0a0a;--bg-card:#111;--cyan:#00e5ff;--red:#ff3131;--amber:#ffb300;--purple:#bf40bf;--text:#c0c0c0;--text-bright:#e0e0e0;--text-dim:#555;--text-dark:#333;--border:rgba(255,255,255,0.04);--border-hover:rgba(255,255,255,0.12);--scanline:rgba(255,255,255,0.008);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Fira Code',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scanline) 2px,var(--scanline) 4px);pointer-events:none;z-index:9999;}
+#matrix-bg{position:fixed;inset:0;z-index:0;opacity:0.035;}
+.wrapper{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;}
+/* HEADER */
+header{background:#0d0d0d;border-bottom:1px solid var(--border);flex-shrink:0;z-index:100;}
+.header-inner{padding:0 1rem;height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.terminal-title{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.term-dots{display:flex;gap:5px;}.term-dots span{width:9px;height:9px;border-radius:50%;}
+.dot-r{background:#ff5f57;}.dot-y{background:#febc2e;}.dot-g{background:#28c840;}
+.term-path{font-size:.75rem;color:var(--text-dim);white-space:nowrap;}
+.term-path .user{color:var(--accent);}.term-path .at,.term-path .colon{color:var(--text-dark);}.term-path .host{color:var(--cyan);}.term-path .dir{color:var(--purple);}.term-path .cursor{color:var(--accent);animation:blink 1s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+.header-center{display:flex;align-items:center;gap:12px;flex:1;justify-content:center;}
+.search-box{position:relative;}
+.search-box input{width:200px;padding:6px 10px 6px 28px;background:rgba(255,255,255,.02);border:1px solid var(--accent-border);border-radius:4px;color:var(--accent);font-family:'Fira Code',monospace;font-size:.7rem;outline:none;transition:all .2s;}
+.search-box input::placeholder{color:rgba(255,255,255,.15);}.search-box input:focus{border-color:var(--accent);box-shadow:0 0 10px var(--accent-dim);}
+.search-box .s-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);width:12px;height:12px;color:var(--text-dark);}
+.pomo-widget{display:flex;align-items:center;gap:6px;}.pomo-time{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--accent);text-shadow:0 0 6px var(--accent-glow);min-width:48px;text-align:center;}.pomo-label{font-size:.5rem;color:var(--text-dark);text-transform:uppercase;letter-spacing:1px;}
+.pomo-btn{background:none;border:1px solid var(--accent-border);color:var(--accent);font-family:'Fira Code',monospace;font-size:.55rem;padding:2px 7px;border-radius:3px;cursor:pointer;transition:all .2s;}.pomo-btn:hover{background:var(--accent-dim);}.pomo-btn.active{background:var(--accent);color:#000;}
+.header-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.theme-switcher{display:flex;gap:4px;}.theme-dot{width:12px;height:12px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;opacity:.5;}.theme-dot:hover,.theme-dot.active{opacity:1;border-color:var(--text-dim);transform:scale(1.15);}
+.theme-dot[data-t="green"]{background:#00ff41;}.theme-dot[data-t="cyan"]{background:#00e5ff;}.theme-dot[data-t="amber"]{background:#ffb300;}
+.hdr-btn{background:none;border:1px solid var(--accent-border);color:var(--accent);width:28px;height:28px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}.hdr-btn:hover{background:var(--accent-dim);}.hdr-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.clock-block{text-align:right;line-height:1.2;}.clock-time{font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--accent);text-shadow:0 0 8px var(--accent-glow);letter-spacing:1px;}.clock-date{font-size:.52rem;color:var(--text-dark);}
+/* STATUS */
+.status-bar{background:#080808;border-bottom:1px solid var(--border);flex-shrink:0;}.status-inner{padding:4px 1rem;display:flex;align-items:center;gap:16px;font-size:.55rem;color:var(--text-dark);flex-wrap:wrap;}.status-item{display:flex;align-items:center;gap:4px;white-space:nowrap;}.status-led{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent-glow);animation:pulse-led 2s ease-in-out infinite;}
+@keyframes pulse-led{0%,100%{opacity:1;}50%{opacity:.4;}}.status-val{color:var(--text-dim);}.status-hl{color:var(--accent);}
+/* SIDE PANELS */
+.side-panel{position:fixed;top:48px;right:0;width:340px;height:calc(100vh - 48px);background:#0d0d0d;border-left:1px solid var(--accent-border);z-index:99;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;}.side-panel.open{transform:translateX(0);}
+.sp-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:.65rem;color:var(--accent);}.sp-hdr span{font-size:.55rem;color:var(--text-dark);}
+.sp-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;font-family:'Fira Code',monospace;}.sp-close:hover{color:var(--red);}
+#notepadPanel textarea{flex:1;background:0 0;border:none;color:var(--text);font-family:'Fira Code',monospace;font-size:.7rem;padding:14px;outline:none;resize:none;line-height:1.6;}
+#notepadPanel textarea::placeholder{color:var(--text-dark);}
+.np-status{padding:6px 14px;font-size:.5rem;color:var(--text-dark);border-top:1px solid var(--border);}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}.modal-overlay.open{display:flex;}
+.modal{background:#111;border:1px solid var(--accent-border);border-radius:8px;width:460px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,.5),0 0 20px var(--accent-dim);}
+.modal-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}.modal-title{font-size:.75rem;color:var(--accent);font-weight:600;}
+.modal-body{padding:16px 18px;overflow-y:auto;flex:1;}.form-group{margin-bottom:12px;}.form-label{display:block;font-size:.6rem;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;}
+.form-input,.form-select{width:100%;padding:7px 10px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'Fira Code',monospace;font-size:.7rem;outline:none;transition:border-color .2s;}.form-input:focus,.form-select:focus{border-color:var(--accent-border);}
+.form-select{cursor:pointer;-webkit-appearance:none;appearance:none;}.form-select option{background:#111;color:var(--text);}
+.form-row{display:flex;gap:10px;}.form-row .form-group{flex:1;}
+.modal-actions{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.btn{padding:7px 16px;border-radius:4px;font-family:'Fira Code',monospace;font-size:.68rem;cursor:pointer;transition:all .2s;border:1px solid var(--border);}.btn-primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}.btn-primary:hover{box-shadow:0 0 12px var(--accent-glow);}.btn-ghost{background:none;color:var(--text-dim);}.btn-ghost:hover{color:var(--text);border-color:var(--text-dim);}.btn-danger{background:none;color:var(--red);border-color:rgba(255,49,49,.2);}.btn-danger:hover{background:rgba(255,49,49,.1);border-color:var(--red);}
+.icon-picker{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;max-height:110px;overflow-y:auto;padding:3px;}.icon-opt{width:100%;aspect-ratio:1;border-radius:4px;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--text-dim);transition:all .15s;}.icon-opt:hover,.icon-opt.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.color-picker{display:flex;gap:5px;flex-wrap:wrap;}.color-opt{width:22px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .15s;}.color-opt:hover,.color-opt.selected{border-color:#fff;transform:scale(1.15);}
+/* MAIN LAYOUT */
+main{flex:1;display:flex;gap:1rem;padding:1rem;overflow:hidden;min-height:0;}
+.main-tools{flex:1;min-width:0;overflow-y:auto;padding-right:6px;}
+.main-tools::-webkit-scrollbar{width:3px;}.main-tools::-webkit-scrollbar-track{background:transparent;}.main-tools::-webkit-scrollbar-thumb{background:var(--accent-border);border-radius:4px;}
+.section{margin-bottom:1.4rem;}.section-header{display:flex;align-items:center;gap:6px;margin-bottom:.65rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+.sec-prefix{color:var(--text-dark);font-size:.65rem;}.sec-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);text-shadow:0 0 10px var(--accent-glow);}.sec-count{margin-left:auto;font-size:.52rem;color:var(--text-dark);border:1px solid var(--border);padding:1px 6px;border-radius:3px;}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:7px;}
+.tool-card{background:var(--bg-card);border:1px solid var(--border);border-radius:5px;padding:.8rem .65rem;text-decoration:none;display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--accent);box-shadow:0 0 8px var(--accent);opacity:0;transition:opacity .2s;}
+.tool-card:hover{border-color:var(--border-hover);transform:translateY(-1px);box-shadow:0 0 15px rgba(255,255,255,.02);}.tool-card:hover::before{opacity:1;}
+.tool-delete{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:3px;background:rgba(255,49,49,.1);border:1px solid rgba(255,49,49,.2);color:var(--red);font-size:.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:all .2s;font-family:'Fira Code',monospace;z-index:2;}.tool-card:hover .tool-delete{opacity:1;}.tool-delete:hover{background:rgba(255,49,49,.25);border-color:var(--red);}
+.tool-icon{width:34px;height:34px;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.95rem;}.tool-card:hover .tool-icon{transform:scale(1.08);box-shadow:0 0 8px var(--accent-glow);}
+.ic-green{background:rgba(0,255,65,.05);color:#00ff41;border:1px solid rgba(0,255,65,.1);}.ic-cyan{background:rgba(0,229,255,.05);color:#00e5ff;border:1px solid rgba(0,229,255,.1);}.ic-red{background:rgba(255,49,49,.05);color:#ff3131;border:1px solid rgba(255,49,49,.1);}.ic-amber{background:rgba(255,179,0,.05);color:#ffb300;border:1px solid rgba(255,179,0,.1);}.ic-purple{background:rgba(191,64,191,.05);color:#bf40bf;border:1px solid rgba(191,64,191,.1);}.ic-white{background:rgba(255,255,255,.02);color:#777;border:1px solid rgba(255,255,255,.05);}.ic-orange{background:rgba(255,140,0,.05);color:#ff8c00;border:1px solid rgba(255,140,0,.1);}.ic-blue{background:rgba(0,120,255,.05);color:#0078ff;border:1px solid rgba(0,120,255,.1);}.ic-pink{background:rgba(255,0,128,.05);color:#ff0080;border:1px solid rgba(255,0,128,.1);}.ic-lime{background:rgba(180,255,0,.05);color:#b4ff00;border:1px solid rgba(180,255,0,.1);}
+.tool-name{font-size:.65rem;font-weight:600;color:var(--text-bright);line-height:1.2;}.tool-desc{font-size:.52rem;color:var(--text-dark);}.tool-url{font-size:.45rem;color:var(--text-dark);opacity:0;transition:opacity .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}.tool-card:hover .tool-url{opacity:1;}
+.tool-card{opacity:0;transform:translateY(8px);animation:cardIn .3s ease forwards;animation-delay:calc(var(--i,0)*.02s);}@keyframes cardIn{to{opacity:1;transform:translateY(0);}}.tool-card.hidden{display:none;}.section.hidden-section{display:none;}
+/* NEWS PANEL */
+.news-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:0;}
+.news-header{display:flex;align-items:center;gap:6px;padding-bottom:.5rem;margin-bottom:.4rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+.news-header .sec-prefix{color:var(--text-dark);font-size:.65rem;}.news-header .sec-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);text-shadow:0 0 10px var(--accent-glow);}
+.news-links{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;flex-shrink:0;}
+.news-link-card{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;text-decoration:none;font-size:.58rem;color:var(--text-dim);font-family:'Fira Code',monospace;transition:all .2s;white-space:nowrap;cursor:pointer;}
+.news-link-card span{font-size:.7rem;}
+.news-link-card:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim);transform:translateY(-1px);}
+.news-tabs{display:flex;gap:3px;margin-bottom:0;flex-shrink:0;}
+.news-tab{background:rgba(255,255,255,.02);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:7px 14px;font-family:'Fira Code',monospace;font-size:.58rem;color:var(--text-dim);cursor:pointer;transition:all .2s;flex:1;text-align:center;white-space:nowrap;}
+.news-tab:hover{color:var(--text);border-color:var(--border-hover);}
+.news-tab.active{background:var(--bg-card);color:var(--accent);border-color:var(--accent-border);}
+.news-viewer{flex:1;display:flex;flex-direction:column;background:var(--bg-card);border:1px solid var(--accent-border);border-radius:0 0 6px 6px;overflow:hidden;min-height:0;}
+.news-viewer-bar{padding:5px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(0,0,0,.3);flex-shrink:0;}
+.news-viewer-title{font-size:.6rem;font-weight:600;color:var(--accent);}
+.news-viewer-actions{display:flex;gap:5px;}
+.news-act-btn{background:none;border:1px solid var(--border);color:var(--text-dim);width:22px;height:22px;border-radius:3px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;text-decoration:none;font-family:'Fira Code',monospace;}
+.news-act-btn:hover{color:var(--accent);border-color:var(--accent-border);background:var(--accent-dim);}
+.news-main-iframe{flex:1;width:100%;border:none;background:#fff;min-height:0;}
+/* KEEP PANEL */
+.keep-panel{position:fixed;top:48px;right:0;width:380px;height:calc(100vh - 48px);background:#0d0d0d;border-left:1px solid var(--accent-border);z-index:98;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;}
+.keep-panel.open{transform:translateX(0);}
+.keep-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.keep-hdr-left{display:flex;align-items:center;gap:8px;}.keep-hdr-title{font-size:.65rem;color:var(--accent);font-weight:600;}
+.keep-search{padding:0 14px 10px;flex-shrink:0;}
+.keep-search input{width:100%;padding:6px 10px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'Fira Code',monospace;font-size:.65rem;outline:none;transition:border-color .2s;}
+.keep-search input:focus{border-color:var(--accent-border);}
+.keep-search input::placeholder{color:var(--text-dark);}
+.keep-add{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.keep-add-form{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s;}
+.keep-add-form:focus-within{border-color:var(--accent-border);}
+.keep-add-title{width:100%;padding:8px 10px 4px;background:none;border:none;color:var(--text-bright);font-family:'Fira Code',monospace;font-size:.68rem;font-weight:600;outline:none;}
+.keep-add-title::placeholder{color:var(--text-dark);font-weight:400;}
+.keep-add-body{width:100%;padding:4px 10px 8px;background:none;border:none;color:var(--text);font-family:'Fira Code',monospace;font-size:.62rem;outline:none;resize:none;min-height:40px;line-height:1.5;}
+.keep-add-body::placeholder{color:var(--text-dark);}
+.keep-add-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-top:1px solid var(--border);}
+.keep-colors{display:flex;gap:4px;}
+.keep-color{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}.keep-color:hover,.keep-color.sel{border-color:var(--text);transform:scale(1.15);}
+.keep-add-actions{display:flex;gap:6px;}
+.keep-small-btn{background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'Fira Code',monospace;font-size:.55rem;padding:3px 10px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.keep-small-btn:hover{color:var(--accent);border-color:var(--accent-border);}
+.keep-small-btn.primary{background:var(--accent);color:#000;border-color:var(--accent);}
+.keep-list{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;}
+.keep-list::-webkit-scrollbar{width:3px;}.keep-list::-webkit-scrollbar-thumb{background:var(--accent-border);border-radius:4px;}
+.keep-note{border-radius:6px;padding:10px 12px;position:relative;transition:all .2s;border:1px solid rgba(255,255,255,.06);}
+.keep-note:hover{border-color:rgba(255,255,255,.12);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.keep-note-pin{position:absolute;top:6px;right:28px;background:none;border:none;cursor:pointer;font-size:.7rem;opacity:.4;transition:opacity .15s;}.keep-note-pin:hover,.keep-note-pin.pinned{opacity:1;}
+.keep-note-del{position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;font-size:.6rem;color:var(--red);opacity:0;transition:opacity .15s;font-family:'Fira Code',monospace;}.keep-note:hover .keep-note-del{opacity:.6;}.keep-note-del:hover{opacity:1!important;}
+.keep-note-title{font-size:.65rem;font-weight:600;color:var(--text-bright);margin-bottom:4px;word-break:break-word;}
+.keep-note-body{font-size:.58rem;color:var(--text);line-height:1.5;word-break:break-word;white-space:pre-wrap;}
+.keep-note-check{display:flex;align-items:flex-start;gap:6px;padding:2px 0;}
+.keep-note-check input[type="checkbox"]{margin-top:2px;accent-color:var(--accent);cursor:pointer;}
+.keep-note-check label{font-size:.58rem;color:var(--text);cursor:pointer;line-height:1.4;}.keep-note-check label.done{text-decoration:line-through;color:var(--text-dark);}
+.keep-note-time{font-size:.45rem;color:var(--text-dark);margin-top:6px;}
+.keep-empty{text-align:center;padding:30px;font-size:.6rem;color:var(--text-dark);}
+/* RESPONSIVE */
+@media(max-width:1100px){main{flex-direction:column;overflow-y:auto;}.main-tools{overflow-y:visible;max-height:none;padding-right:0;}.news-panel{height:500px;flex-shrink:0;}}
+@media(max-width:768px){.header-center{display:none;}.tools-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}}
+@media(max-width:480px){.tools-grid{grid-template-columns:repeat(2,1fr);gap:5px;}.clock-block,.pomo-widget{display:none;}.side-panel,.keep-panel{width:100%;}.modal{width:95vw;}.news-panel{height:400px;}}
+</style>
+</head>
+<body data-theme="green">
+<canvas id="matrix-bg"></canvas>
+<div class="wrapper">
+<header><div class="header-inner">
+<div class="terminal-title"><div class="term-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div><div class="term-path"><span class="user">root</span><span class="at">@</span><span class="host">virus</span><span class="colon">:</span><span class="dir">~/</span><span class="dir" id="typingText"></span><span class="cursor">█</span></div></div>
+<div class="header-center"><div class="search-box"><svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="text" id="searchInput" placeholder="grep -i tool..." autocomplete="off" spellcheck="false"></div><div class="pomo-widget"><span class="pomo-label" id="pomoLabel">FOCUS</span><span class="pomo-time" id="pomoTime">25:00</span><button class="pomo-btn" id="pomoStart">▶</button><button class="pomo-btn" id="pomoReset">↺</button></div></div>
+<div class="header-right"><div class="theme-switcher"><div class="theme-dot active" data-t="green"></div><div class="theme-dot" data-t="cyan"></div><div class="theme-dot" data-t="amber"></div></div><button class="hdr-btn" id="addToolBtn" title="Adicionar [+]"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><button class="hdr-btn" id="notepadBtn" title="Notepad"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></button><button class="hdr-btn" id="keepBtn" title="Keep Notes"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button><div class="clock-block"><div class="clock-time" id="clock"></div><div class="clock-date" id="dateDisplay"></div></div></div>
+</div></header>
+<div class="status-bar"><div class="status-inner">
+<div class="status-item"><div class="status-led"></div><span>SYS</span><span class="status-hl">ONLINE</span></div>
+<div class="status-item"><span>PID</span><span class="status-val" id="pidVal">--</span></div>
+<div class="status-item"><span>TOOLS</span><span class="status-hl" id="toolCount">0</span></div>
+<div class="status-item"><span>UPTIME</span><span class="status-val" id="uptime">00:00:00</span></div>
+<div class="status-item"><span>IP</span><span class="status-hl" id="myIp">...</span></div>
+<div class="status-item"><span>PING</span><span class="status-val" id="pingVal">--</span></div>
+<div class="status-item"><span id="weatherIcon">☁</span><span class="status-hl" id="weatherTemp">--</span><span class="status-val">Recife</span></div>
+</div></div>
+<div class="side-panel" id="notepadPanel"><div class="sp-hdr">// notepad.txt <span>auto-save</span><button class="sp-close" onclick="document.getElementById('notepadPanel').classList.remove('open')">×</button></div><textarea id="notepadArea" placeholder="# Anotações rápidas..."></textarea><div class="np-status" id="notepadStatus">saved</div></div>
+<!-- KEEP PANEL -->
+<div class="keep-panel" id="keepPanel">
+<div class="keep-hdr"><div class="keep-hdr-left"><span style="font-size:.8rem">📌</span><span class="keep-hdr-title">Keep Notes</span></div><button class="sp-close" onclick="document.getElementById('keepPanel').classList.remove('open')">×</button></div>
+<div class="keep-search"><input type="text" id="keepSearch" placeholder="Buscar notas..." autocomplete="off"></div>
+<div class="keep-add">
+<div class="keep-add-form">
+<input class="keep-add-title" id="keepTitle" placeholder="Título da nota...">
+<textarea class="keep-add-body" id="keepBody" placeholder="Escreva aqui... (para checklist use linhas separadas)" rows="2"></textarea>
+<div class="keep-add-bar">
+<div class="keep-colors" id="keepColors">
+<div class="keep-color sel" data-kc="#1a1a1a" style="background:#1a1a1a;border:1px solid #333"></div>
+<div class="keep-color" data-kc="#2d1b1b" style="background:#2d1b1b"></div>
+<div class="keep-color" data-kc="#1b2d1b" style="background:#1b2d1b"></div>
+<div class="keep-color" data-kc="#1b1b2d" style="background:#1b1b2d"></div>
+<div class="keep-color" data-kc="#2d2b1b" style="background:#2d2b1b"></div>
+<div class="keep-color" data-kc="#2d1b2a" style="background:#2d1b2a"></div>
+<div class="keep-color" data-kc="#1b2a2d" style="background:#1b2a2d"></div>
+</div>
+<div class="keep-add-actions">
+<button class="keep-small-btn" id="keepCheckToggle" title="Checklist">☑</button>
+<button class="keep-small-btn primary" id="keepSaveBtn">Salvar</button>
+</div>
+</div>
+</div>
+</div>
+<div class="keep-list" id="keepList"></div>
+</div>
+<div class="modal-overlay" id="addModal"><div class="modal"><div class="modal-header"><span class="modal-title">+ Adicionar Ferramenta</span><button class="sp-close" onclick="closeModal()">×</button></div><div class="modal-body">
+<div class="form-group"><label class="form-label">Nome *</label><input class="form-input" id="fName" placeholder="Ex: VirusTotal"></div>
+<div class="form-group"><label class="form-label">URL *</label><input class="form-input" id="fUrl" placeholder="https://..."></div>
+<div class="form-row"><div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="fDesc" placeholder="Ex: Malware analysis"></div>
+<div class="form-group"><label class="form-label">Categoria *</label><select class="form-select" id="fCat"><option value="chat">Chat · AI</option><option value="osint">Investigação · OSINT</option><option value="network">Redes · Network</option><option value="forensic">Forense · Analysis</option><option value="ctf">CTF · Challenges</option><option value="dev">Dev · Tools</option></select></div></div>
+<div class="form-group"><label class="form-label">Ícone</label><div class="icon-picker" id="iconPicker">
+<button class="icon-opt selected" data-icon="🔗">🔗</button><button class="icon-opt" data-icon="🛡">🛡</button><button class="icon-opt" data-icon="🔍">🔍</button><button class="icon-opt" data-icon="⚡">⚡</button><button class="icon-opt" data-icon="🌐">🌐</button><button class="icon-opt" data-icon="💻">💻</button><button class="icon-opt" data-icon="🔒">🔒</button><button class="icon-opt" data-icon="📡">📡</button><button class="icon-opt" data-icon="🧪">🧪</button><button class="icon-opt" data-icon="📊">📊</button><button class="icon-opt" data-icon="🗂">🗂</button><button class="icon-opt" data-icon="🐛">🐛</button><button class="icon-opt" data-icon="🎯">🎯</button><button class="icon-opt" data-icon="🧠">🧠</button><button class="icon-opt" data-icon="🔥">🔥</button><button class="icon-opt" data-icon="⚙">⚙</button><button class="icon-opt" data-icon="📝">📝</button><button class="icon-opt" data-icon="🚀">🚀</button>
+</div></div>
+<div class="form-group"><label class="form-label">Cor do ícone</label><div class="color-picker" id="colorPicker">
+<div class="color-opt selected" data-color="ic-green" style="background:#00ff41"></div><div class="color-opt" data-color="ic-cyan" style="background:#00e5ff"></div><div class="color-opt" data-color="ic-red" style="background:#ff3131"></div><div class="color-opt" data-color="ic-amber" style="background:#ffb300"></div><div class="color-opt" data-color="ic-purple" style="background:#bf40bf"></div><div class="color-opt" data-color="ic-blue" style="background:#0078ff"></div><div class="color-opt" data-color="ic-orange" style="background:#ff8c00"></div><div class="color-opt" data-color="ic-pink" style="background:#ff0080"></div><div class="color-opt" data-color="ic-lime" style="background:#b4ff00"></div><div class="color-opt" data-color="ic-white" style="background:#777"></div>
+</div></div>
+</div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="addTool()">+ Adicionar</button></div></div></div>
+<div class="modal-overlay" id="deleteModal"><div class="modal" style="width:340px"><div class="modal-header"><span class="modal-title" style="color:var(--red)">Remover ferramenta</span><button class="sp-close" onclick="closeDeleteModal()">×</button></div><div class="modal-body"><p style="font-size:.7rem;color:var(--text)">Remover <strong id="delName"></strong>?</p></div><div class="modal-actions"><button class="btn btn-ghost" onclick="closeDeleteModal()">Cancelar</button><button class="btn btn-danger" onclick="confirmDelete()">Remover</button></div></div></div>
+<main>
+<div class="main-tools" id="mainContent"></div>
+<div class="news-panel">
+<div class="news-header"><span class="sec-prefix">></span><span class="sec-label">Mural · Feed</span></div>
+<div class="news-links">
+<a class="news-link-card" href="https://caveiratech.com/" target="_blank"><span>💀</span> CaveiraTech</a>
+<a class="news-link-card" href="https://www.reddit.com/r/cybersecurity/" target="_blank"><span>🟠</span> r/cybersecurity</a>
+<a class="news-link-card" href="https://news.ycombinator.com/" target="_blank"><span>🟧</span> Hacker News</a>
+<a class="news-link-card" href="https://www.bleepingcomputer.com/" target="_blank"><span>💻</span> BleepingComputer</a>
+<a class="news-link-card" href="https://www.darkreading.com/" target="_blank"><span>📰</span> Dark Reading</a>
+<a class="news-link-card" href="https://thehackernews.com/" target="_blank"><span>🔓</span> The Hacker News</a>
+</div>
+<div class="news-tabs">
+<button class="news-tab active" data-src="https://boletimsec.com/" data-title="BoletimSec">🔒 BoletimSec</button>
+<button class="news-tab" data-src="https://www.cisoadvisor.com.br/" data-title="CISO Advisor">🛡 CISO</button>
+<button class="news-tab" data-src="https://coin360.com/" data-title="Coin360">📊 Coin360</button>
+</div>
+<div class="news-viewer">
+<div class="news-viewer-bar"><span class="news-viewer-title" id="newsTitle">BoletimSec</span><div class="news-viewer-actions"><button class="news-act-btn" id="newsRefresh" title="Refresh">↻</button><a class="news-act-btn" id="newsOpen" href="https://boletimsec.com/" target="_blank" title="Abrir">↗</a></div></div>
+<iframe class="news-main-iframe" id="newsIframe" src="https://boletimsec.com/" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+</div>
+</div>
+</main>
+</div>
+<script>
+const DEFAULT_TOOLS=[
+// Chat AI
+{id:'t1',name:'ChatGPT',url:'https://chatgpt.com/',desc:'OpenAI',cat:'chat',icon:'🧠',color:'ic-green'},
+{id:'t2',name:'Gemini',url:'https://gemini.google.com/',desc:'Google',cat:'chat',icon:'⚡',color:'ic-cyan'},
+{id:'t3',name:'Blackbox AI',url:'https://www.blackbox.ai/',desc:'Code AI',cat:'chat',icon:'💻',color:'ic-white'},
+{id:'t4',name:'Grok',url:'https://grok.com/',desc:'xAI',cat:'chat',icon:'🧠',color:'ic-blue'},
+{id:'t5',name:'DeepSeek',url:'https://chat.deepseek.com/',desc:'DeepSeek AI',cat:'chat',icon:'🔍',color:'ic-purple'},
+{id:'t6',name:'Skywork',url:'https://skywork.ai/',desc:'Skywork AI',cat:'chat',icon:'🌐',color:'ic-cyan'},
+{id:'t7',name:'GenSpark',url:'https://www.genspark.ai/',desc:'AI Search',cat:'chat',icon:'⚡',color:'ic-amber'},
+{id:'t8',name:'Manus',url:'https://manus.im/app',desc:'AI Agent',cat:'chat',icon:'🚀',color:'ic-purple'},
+{id:'t9',name:'NotebookLM',url:'https://notebooklm.google.com/',desc:'Google AI Notebook',cat:'chat',icon:'📝',color:'ic-blue'},
+{id:'t70',name:'InverTexto',url:'https://www.invertexto.com/',desc:'Text tools',cat:'chat',icon:'📊',color:'ic-orange'},
+{id:'t71',name:'AI Studio',url:'https://aistudio.google.com/',desc:'Google AI Studio',cat:'chat',icon:'🧪',color:'ic-cyan'},
+{id:'t72',name:'SkynetChat',url:'https://skynetchat.net/',desc:'AI Chat',cat:'chat',icon:'🤖',color:'ic-red'},
+// OSINT
+{id:'t10',name:'VirusTotal',url:'https://www.virustotal.com/',desc:'Malware analysis',cat:'osint',icon:'🛡',color:'ic-red'},
+{id:'t11',name:'DeHashed',url:'https://www.dehashed.com/',desc:'Breach search',cat:'osint',icon:'🔒',color:'ic-orange'},
+{id:'t12',name:'HaveIBeenPwned',url:'https://haveibeenpwned.com/',desc:'Breach checker',cat:'osint',icon:'🔥',color:'ic-red'},
+{id:'t13',name:'DNS Checker',url:'https://dnschecker.org/all-tools.php',desc:'DNS toolkit',cat:'osint',icon:'🌐',color:'ic-cyan'},
+{id:'t14',name:'YouGetSignal',url:'https://www.yougetsignal.com/',desc:'Network recon',cat:'osint',icon:'📡',color:'ic-green'},
+{id:'t15',name:'PrankShit',url:'https://prankshit.com/',desc:'Lookup tools',cat:'osint',icon:'🔍',color:'ic-pink'},
+{id:'t16',name:'Grabify',url:'https://grabify.link/',desc:'IP logger',cat:'osint',icon:'🔗',color:'ic-amber'},
+{id:'t17',name:'Peciondated',url:'https://peciondated.com/',desc:'Tracker',cat:'osint',icon:'🎯',color:'ic-purple'},
+{id:'t18',name:'Shodan',url:'https://www.shodan.io/',desc:'IoT search engine',cat:'osint',icon:'📡',color:'ic-red'},
+{id:'t19',name:'Boitatá OSINT',url:'https://boitata.app.br/osint',desc:'OSINT Brasil',cat:'osint',icon:'🔍',color:'ic-lime'},
+{id:'t20',name:'OSINT Framework',url:'https://osintframework.com/',desc:'Tool map',cat:'osint',icon:'🌐',color:'ic-green'},
+{id:'t21',name:'Hybrid Analysis',url:'https://hybrid-analysis.com/',desc:'Malware sandbox',cat:'osint',icon:'🧪',color:'ic-blue'},
+{id:'t22',name:'AbuseIPDB',url:'https://www.abuseipdb.com/',desc:'IP reputation',cat:'osint',icon:'🛡',color:'ic-orange'},
+{id:'t23',name:'MITRE ATT&CK',url:'https://attack.mitre.org/',desc:'Threat framework',cat:'osint',icon:'🎯',color:'ic-red'},
+{id:'t24',name:'Censys',url:'https://search.censys.io/',desc:'Host & cert search',cat:'osint',icon:'🔍',color:'ic-cyan'},
+{id:'t25',name:'GreyNoise',url:'https://viz.greynoise.io/',desc:'Threat intel',cat:'osint',icon:'📡',color:'ic-purple'},
+// Network
+{id:'t30',name:'Speedtest',url:'https://www.speedtest.net/',desc:'Ookla',cat:'network',icon:'⚡',color:'ic-cyan'},
+{id:'t31',name:'WhatIsMyIP',url:'https://www.whatismyip.com/',desc:'IP lookup',cat:'network',icon:'🌐',color:'ic-green'},
+{id:'t32',name:'MXToolbox',url:'https://mxtoolbox.com/',desc:'DNS & mail diag',cat:'network',icon:'📡',color:'ic-amber'},
+{id:'t33',name:'Wireshark',url:'https://www.wireshark.org/',desc:'Packet analyzer',cat:'network',icon:'📊',color:'ic-blue'},
+{id:'t34',name:'CentralOps',url:'https://centralops.net/co/',desc:'Whois & traceroute',cat:'network',icon:'🔍',color:'ic-orange'},
+{id:'t35',name:'Subnet Converter',url:'https://subnetonline.com/pages/converters/hex-to-bin-to-dec.php',desc:'Hex / Bin / Dec',cat:'network',icon:'💻',color:'ic-cyan'},
+{id:'t36',name:'Nmap Online',url:'https://nmap.online/',desc:'Port scanner',cat:'network',icon:'📡',color:'ic-red'},
+{id:'t37',name:'IPinfo',url:'https://ipinfo.io/',desc:'Geo & ASN lookup',cat:'network',icon:'🌐',color:'ic-lime'},
+// Forensic
+{id:'t40',name:'CyberChef',url:'https://gchq.github.io/CyberChef/',desc:'Encode / Decode',cat:'forensic',icon:'🧪',color:'ic-amber'},
+{id:'t41',name:'Base64 Decode',url:'https://www.base64decode.org/',desc:'Encoder / Decoder',cat:'forensic',icon:'💻',color:'ic-green'},
+{id:'t42',name:'EFF Wordlist',url:'https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt',desc:'Diceware list',cat:'forensic',icon:'📝',color:'ic-green'},
+{id:'t43',name:'ANY.RUN',url:'https://any.run/',desc:'Interactive sandbox',cat:'forensic',icon:'🔥',color:'ic-red'},
+{id:'t44',name:'URLScan.io',url:'https://urlscan.io/',desc:'URL scanner',cat:'forensic',icon:'🔍',color:'ic-cyan'},
+{id:'t45',name:'Talos Intelligence',url:'https://talosintelligence.com/',desc:'Threat intel',cat:'forensic',icon:'🛡',color:'ic-blue'},
+{id:'t46',name:'ExploitDB',url:'https://www.exploit-db.com/',desc:'Exploit database',cat:'forensic',icon:'🐛',color:'ic-red'},
+{id:'t47',name:'MalwareBazaar',url:'https://bazaar.abuse.ch/',desc:'Malware samples',cat:'forensic',icon:'🧪',color:'ic-purple'},
+{id:'t48',name:'Joe Sandbox',url:'https://www.joesandbox.com/',desc:'Deep analysis',cat:'forensic',icon:'🔍',color:'ic-orange'},
+// CTF
+{id:'t50',name:'Hack The Box',url:'https://www.hackthebox.com/',desc:'Pentest labs',cat:'ctf',icon:'💻',color:'ic-green'},
+{id:'t51',name:'TryHackMe',url:'https://tryhackme.com/',desc:'Learn hacking',cat:'ctf',icon:'🛡',color:'ic-red'},
+{id:'t52',name:'CTFtime',url:'https://ctftime.org/',desc:'CTF events',cat:'ctf',icon:'🎯',color:'ic-amber'},
+{id:'t53',name:'OverTheWire',url:'https://overthewire.org/wargames/',desc:'Wargames',cat:'ctf',icon:'💻',color:'ic-cyan'},
+{id:'t54',name:'PortSwigger',url:'https://portswigger.net/web-security',desc:'Web Security Academy',cat:'ctf',icon:'🌐',color:'ic-orange'},
+{id:'t55',name:'PentesterLab',url:'https://pentesterlab.com/',desc:'Web exploit labs',cat:'ctf',icon:'🔒',color:'ic-purple'},
+{id:'t56',name:'CyberDefenders',url:'https://cyberdefenders.org/',desc:'Blue team CTF',cat:'ctf',icon:'🛡',color:'ic-blue'},
+// Dev
+{id:'t60',name:'GitHub',url:'https://github.com/',desc:'Code repos',cat:'dev',icon:'💻',color:'ic-white'},
+{id:'t61',name:'StackOverflow',url:'https://stackoverflow.com/questions',desc:'Dev Q&A',cat:'dev',icon:'📝',color:'ic-orange'},
+{id:'t62',name:'Regex101',url:'https://regex101.com/',desc:'Regex tester',cat:'dev',icon:'💻',color:'ic-green'},
+{id:'t63',name:'JSON Crack',url:'https://jsoncrack.com/editor',desc:'JSON visualizer',cat:'dev',icon:'🗂',color:'ic-cyan'},
+{id:'t64',name:'DevDocs',url:'https://devdocs.io/',desc:'API docs',cat:'dev',icon:'📝',color:'ic-purple'},
+{id:'t65',name:'Postman',url:'https://www.postman.com/',desc:'API testing',cat:'dev',icon:'🚀',color:'ic-amber'},
+{id:'t66',name:'Hoppscotch',url:'https://hoppscotch.io/',desc:'Open-source API',cat:'dev',icon:'⚡',color:'ic-green'},
+{id:'t67',name:'Excalidraw',url:'https://excalidraw.com/',desc:'Diagramas',cat:'dev',icon:'📊',color:'ic-cyan'}
+];
+const SECTIONS=[{id:'chat',label:'Chat · AI',prefix:'$'},{id:'osint',label:'Investigação · OSINT',prefix:'#'},{id:'network',label:'Redes · Network',prefix:'$'},{id:'forensic',label:'Forense · Analysis',prefix:'#'},{id:'ctf',label:'CTF · Challenges',prefix:'$'},{id:'dev',label:'Dev · Tools',prefix:'#'}];
+function loadTools(){const s=localStorage.getItem('panel_tools_v4');return s?JSON.parse(s):null;}
+function saveTools(t){localStorage.setItem('panel_tools_v4',JSON.stringify(t));}
+let tools=loadTools()||[...DEFAULT_TOOLS];if(!loadTools())saveTools(tools);
+const normalize=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+function render(){const main=document.getElementById('mainContent'),q=normalize(document.getElementById('searchInput').value);let html='';SECTIONS.forEach(sec=>{const items=tools.filter(t=>t.cat===sec.id);if(!items.length)return;const filtered=q?items.filter(t=>normalize(t.name+' '+t.desc+' '+t.url).includes(q)):items;const hidden=filtered.length===0?' hidden-section':'';html+=`<div class="section${hidden}" data-section><div class="section-header"><span class="sec-prefix">${sec.prefix}</span><h2 class="sec-label">${sec.label}</h2><span class="sec-count">${filtered.length}</span></div><div class="tools-grid">`;items.forEach((t,i)=>{const match=!q||normalize(t.name+' '+t.desc+' '+t.url).includes(q);const cls=match?'':'hidden';const domain=t.url.replace(/https?:\/\/(www\.)?/,'').split('/')[0];html+=`<a class="tool-card ${cls}" href="${t.url}" target="_blank" style="--i:${i}" data-id="${t.id}"><button class="tool-delete" onclick="event.preventDefault();event.stopPropagation();askDelete('${t.id}')">×</button><div class="tool-icon ${t.color}">${t.icon}</div><div class="tool-name">${t.name}</div><div class="tool-desc">${t.desc||''}</div><div class="tool-url">${domain}</div></a>`;});html+=`</div></div>`;});main.innerHTML=html;document.getElementById('toolCount').textContent=tools.length;}
+let selectedIcon='🔗',selectedColor='ic-green',pendingDeleteId=null;
+document.getElementById('addToolBtn').addEventListener('click',()=>{document.getElementById('addModal').classList.add('open');document.getElementById('fName').focus();});
+function closeModal(){document.getElementById('addModal').classList.remove('open');['fName','fUrl','fDesc'].forEach(id=>document.getElementById(id).value='');document.getElementById('fCat').value='chat';selectedIcon='🔗';selectedColor='ic-green';document.querySelectorAll('.icon-opt').forEach(e=>e.classList.toggle('selected',e.dataset.icon==='🔗'));document.querySelectorAll('.color-opt').forEach(e=>e.classList.toggle('selected',e.dataset.color==='ic-green'));}
+function addTool(){const name=document.getElementById('fName').value.trim();let url=document.getElementById('fUrl').value.trim();const desc=document.getElementById('fDesc').value.trim();const cat=document.getElementById('fCat').value;if(!name||!url)return;if(!url.startsWith('http'))url='https://'+url;tools.push({id:'t_'+Date.now(),name,url,desc,cat,icon:selectedIcon,color:selectedColor});saveTools(tools);render();closeModal();}
+function askDelete(id){pendingDeleteId=id;const t=tools.find(x=>x.id===id);document.getElementById('delName').textContent=t?t.name:'';document.getElementById('deleteModal').classList.add('open');}
+function closeDeleteModal(){document.getElementById('deleteModal').classList.remove('open');pendingDeleteId=null;}
+function confirmDelete(){if(pendingDeleteId){tools=tools.filter(t=>t.id!==pendingDeleteId);saveTools(tools);render();}closeDeleteModal();}
+document.getElementById('iconPicker').addEventListener('click',e=>{const b=e.target.closest('.icon-opt');if(!b)return;selectedIcon=b.dataset.icon;document.querySelectorAll('.icon-opt').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');});
+document.getElementById('colorPicker').addEventListener('click',e=>{const b=e.target.closest('.color-opt');if(!b)return;selectedColor=b.dataset.color;document.querySelectorAll('.color-opt').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');});
+document.getElementById('addModal').addEventListener('click',e=>{if(e.target===document.getElementById('addModal'))closeModal();});
+document.getElementById('deleteModal').addEventListener('click',e=>{if(e.target===document.getElementById('deleteModal'))closeDeleteModal();});
+// Matrix
+const canvas=document.getElementById('matrix-bg'),ctx=canvas.getContext('2d');function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}resizeCanvas();window.addEventListener('resize',resizeCanvas);const chars='01アイウエオカキクケコサシスセソ';const fontSize=14;let columns=Math.floor(canvas.width/fontSize),drops=Array(columns).fill(1);function gmc(){return getComputedStyle(document.body).getPropertyValue('--matrix-color').trim()||'#00ff41';}function drawMatrix(){ctx.fillStyle='rgba(10,10,10,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle=gmc();ctx.font=`${fontSize}px "Fira Code"`;for(let i=0;i<drops.length;i++){ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>canvas.height&&Math.random()>.975)drops[i]=0;drops[i]++;}}setInterval(drawMatrix,50);
+// Typing
+const tt='admin-panel',te=document.getElementById('typingText');let ti=0;function tc(){if(ti<=tt.length){te.textContent=tt.slice(0,ti);ti++;setTimeout(tc,80+Math.random()*60);}}tc();
+// Clock
+function uc(){const n=new Date();document.getElementById('clock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;const d=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];document.getElementById('dateDisplay').textContent=`${d[n.getDay()]} ${n.getDate()}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`;}uc();setInterval(uc,1000);
+// Uptime
+const st=Date.now();setInterval(()=>{const e=Math.floor((Date.now()-st)/1000);document.getElementById('uptime').textContent=`${String(Math.floor(e/3600)).padStart(2,'0')}:${String(Math.floor((e%3600)/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`;},1000);
+document.getElementById('pidVal').textContent=Math.floor(Math.random()*90000+10000);
+// Theme
+document.querySelectorAll('.theme-dot').forEach(d=>d.addEventListener('click',()=>{document.body.setAttribute('data-theme',d.dataset.t);document.querySelectorAll('.theme-dot').forEach(x=>x.classList.remove('active'));d.classList.add('active');localStorage.setItem('theme',d.dataset.t);}));const sv=localStorage.getItem('theme');if(sv){document.body.setAttribute('data-theme',sv);document.querySelectorAll('.theme-dot').forEach(d=>d.classList.toggle('active',d.dataset.t===sv));}
+// Pomodoro
+let ps=25*60,pr=false,pi=null,pm='focus';function up(){document.getElementById('pomoTime').textContent=`${String(Math.floor(ps/60)).padStart(2,'0')}:${String(ps%60).padStart(2,'0')}`;}
+document.getElementById('pomoStart').addEventListener('click',function(){if(pr){clearInterval(pi);pr=false;this.textContent='▶';this.classList.remove('active');}else{pr=true;this.textContent='❚❚';this.classList.add('active');pi=setInterval(()=>{ps--;up();if(ps<=0){clearInterval(pi);pr=false;document.getElementById('pomoStart').textContent='▶';document.getElementById('pomoStart').classList.remove('active');pm=pm==='focus'?'break':'focus';ps=pm==='focus'?25*60:5*60;document.getElementById('pomoLabel').textContent=pm==='focus'?'FOCUS':'BREAK';up();try{new Notification('Pomodoro',{body:pm==='break'?'Descanso!':'Focar!'});}catch(e){}}},1000);}});
+document.getElementById('pomoReset').addEventListener('click',()=>{clearInterval(pi);pr=false;pm='focus';ps=25*60;document.getElementById('pomoStart').textContent='▶';document.getElementById('pomoStart').classList.remove('active');document.getElementById('pomoLabel').textContent='FOCUS';up();});
+// Notepad
+const na=document.getElementById('notepadArea');document.getElementById('notepadBtn').addEventListener('click',()=>document.getElementById('notepadPanel').classList.toggle('open'));na.value=localStorage.getItem('notepad')||'';let nst;na.addEventListener('input',()=>{clearTimeout(nst);document.getElementById('notepadStatus').textContent='saving...';nst=setTimeout(()=>{localStorage.setItem('notepad',na.value);document.getElementById('notepadStatus').textContent='saved';},500);});
+// IP
+fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>document.getElementById('myIp').textContent=d.ip).catch(()=>document.getElementById('myIp').textContent='offline');
+// Ping
+function mp(){const t=performance.now();fetch('https://api.ipify.org?format=json',{cache:'no-store'}).then(()=>document.getElementById('pingVal').textContent=`${Math.round(performance.now()-t)}ms`).catch(()=>document.getElementById('pingVal').textContent='--');}mp();setInterval(mp,30000);
+// Weather
+fetch('https://api.open-meteo.com/v1/forecast?latitude=-8.05&longitude=-34.87&current=temperature_2m,weathercode&timezone=America/Recife').then(r=>r.json()).then(d=>{document.getElementById('weatherTemp').textContent=`${Math.round(d.current.temperature_2m)}°C`;const ic={0:'☀',1:'🌤',2:'⛅',3:'☁',45:'🌫',51:'🌦',53:'🌧',61:'🌧',80:'🌦',82:'⛈',95:'⛈'};document.getElementById('weatherIcon').textContent=ic[d.current.weathercode]||'☁';}).catch(()=>{});
+// Search
+document.getElementById('searchInput').addEventListener('input',()=>render());
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('searchInput').focus();document.getElementById('searchInput').select();}if(e.key==='Escape'){document.getElementById('searchInput').value='';render();document.getElementById('searchInput').blur();document.getElementById('notepadPanel').classList.remove('open');document.getElementById('keepPanel').classList.remove('open');closeModal();closeDeleteModal();}});
+// News tabs
+document.querySelectorAll('.news-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.news-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');document.getElementById('newsIframe').src=tab.dataset.src;document.getElementById('newsTitle').textContent=tab.dataset.title;document.getElementById('newsOpen').href=tab.dataset.src;});});
+document.getElementById('newsRefresh').addEventListener('click',()=>{const f=document.getElementById('newsIframe');f.src=f.src;});
+// ═══ KEEP NOTES ═══
+let keepNotes=JSON.parse(localStorage.getItem('keep_notes')||'[]');
+let keepIsChecklist=false;
+let keepSelColor='#1a1a1a';
+document.getElementById('keepBtn').addEventListener('click',()=>{document.getElementById('keepPanel').classList.toggle('open');document.getElementById('notepadPanel').classList.remove('open');renderKeep();});
+// Color picker
+document.getElementById('keepColors').addEventListener('click',e=>{const c=e.target.closest('.keep-color');if(!c)return;keepSelColor=c.dataset.kc;document.querySelectorAll('.keep-color').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');});
+// Checklist toggle
+document.getElementById('keepCheckToggle').addEventListener('click',function(){keepIsChecklist=!keepIsChecklist;this.style.background=keepIsChecklist?'var(--accent)':'none';this.style.color=keepIsChecklist?'#000':'var(--text-dim)';document.getElementById('keepBody').placeholder=keepIsChecklist?'Item 1\nItem 2\nItem 3...':'Escreva aqui...';});
+// Save note
+document.getElementById('keepSaveBtn').addEventListener('click',()=>{const title=document.getElementById('keepTitle').value.trim();const body=document.getElementById('keepBody').value.trim();if(!title&&!body)return;const note={id:'k_'+Date.now(),title,body,color:keepSelColor,pinned:false,isChecklist:keepIsChecklist,checks:keepIsChecklist?body.split('\n').filter(l=>l.trim()).map((l,i)=>({id:i,text:l.trim(),done:false})):[],created:new Date().toLocaleString('pt-BR')};keepNotes.unshift(note);saveKeep();renderKeep();document.getElementById('keepTitle').value='';document.getElementById('keepBody').value='';});
+function saveKeep(){localStorage.setItem('keep_notes',JSON.stringify(keepNotes));}
+function renderKeep(){
+const list=document.getElementById('keepList');const q=normalize(document.getElementById('keepSearch').value);
+let filtered=keepNotes;if(q)filtered=keepNotes.filter(n=>normalize(n.title+' '+n.body+' '+(n.checks||[]).map(c=>c.text).join(' ')).includes(q));
+const sorted=[...filtered].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
+if(!sorted.length){list.innerHTML='<div class="keep-empty">Nenhuma nota ainda.<br>Crie a primeira! 📝</div>';return;}
+let html='';sorted.forEach(n=>{
+const pinCls=n.pinned?'pinned':'';
+let content='';
+if(n.isChecklist&&n.checks&&n.checks.length){
+n.checks.forEach(c=>{content+=`<div class="keep-note-check"><input type="checkbox" ${c.done?'checked':''} onchange="toggleKeepCheck('${n.id}',${c.id})"><label class="${c.done?'done':''}" onclick="toggleKeepCheck('${n.id}',${c.id})">${c.text}</label></div>`;});
+}else if(n.body){content=`<div class="keep-note-body">${n.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;}
+html+=`<div class="keep-note" style="background:${n.color}">
+<button class="keep-note-pin ${pinCls}" onclick="toggleKeepPin('${n.id}')" title="${n.pinned?'Desfixar':'Fixar'}">${n.pinned?'📌':'📍'}</button>
+<button class="keep-note-del" onclick="deleteKeepNote('${n.id}')" title="Excluir">×</button>
+${n.title?`<div class="keep-note-title">${n.title.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`:''}
+${content}
+<div class="keep-note-time">${n.created}</div>
+</div>`;});
+list.innerHTML=html;}
+function toggleKeepPin(id){const n=keepNotes.find(x=>x.id===id);if(n){n.pinned=!n.pinned;saveKeep();renderKeep();}}
+function deleteKeepNote(id){keepNotes=keepNotes.filter(x=>x.id!==id);saveKeep();renderKeep();}
+function toggleKeepCheck(nid,cid){const n=keepNotes.find(x=>x.id===nid);if(n&&n.checks){const c=n.checks.find(x=>x.id===cid);if(c){c.done=!c.done;saveKeep();renderKeep();}}}
+document.getElementById('keepSearch').addEventListener('input',()=>renderKeep());
+render();
+</script>
+</body>
+</html>
