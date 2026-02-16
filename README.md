@@ -40,18 +40,18 @@ Zero dependências. Zero servidor. Abre direto no navegador.
 
 ## 🚀 Como usar
 
-1. Baixe o arquivo `admin-panel-pedro.html`
+1. Baixe o arquivo `admin-panel.html`
 2. Abra no Chrome
 3. (Opcional) Configure como página inicial: `Configurações > Inicialização > Abrir página específica`
 
 ```
-file:///C:/Users/SeuUsuario/Documents/admin-panel-pedro.html
+file:///C:/Users/SeuUsuario/Documents/admin-panel.html
 ```
 
 ## 🎨 Preview
 
 - **Layout split 50/50**: ferramentas à esquerda, mural de notícias à direita
-- **Terminal header**: `root@virus:~/admin-panel█`
+- **Terminal header**: `root@hypnosgasp:~/admin-panel█`
 - **CRT scanlines** + **matrix rain** + **glow effects**
 
 ## 📋 Stack
