@@ -1,4 +1,4 @@
-# 🖥️ Admin Panel Virus — Cybersecurity Dashboard
+# 🖥️ Admin Panel — Cybersecurity Dashboard
 
 > Painel de administração pessoal com estética hacker/terminal para profissionais de cybersecurity.
 
@@ -64,7 +64,7 @@ file:///C:/Users/SeuUsuario/Documents/admin-panel-pedro.html
 
 ## 📝 Licença
 
-Uso pessoal. Feito por **Pedro Lucas**.
+Uso pessoal. Feito por **Hypnosgasp**.
 
 ---
 
